@@ -222,10 +222,21 @@ restore_dotfiles() {
   fi
 
   # Wallpapers -> ~/Pictures/Wallpapers/angel.png (path hard-coded in
-  # hyprpaper.conf + hyprlock.conf)
+  # hyprpaper.conf + hyprlock.conf). The wallpaper binary lives in this repo
+  # (Wallpapers/angel.png) so the OpenCode setup agent can restore it offline.
   mkdir -p "$HOME/Pictures/Wallpapers"
   if [[ -f "$WALLPAPERS_DIR/angel.png" ]]; then
     restore_file "$WALLPAPERS_DIR/angel.png" "$HOME/Pictures/Wallpapers/angel.png"
+    # Apply immediately if Hyprland/hyprpaper is already running (harmless if not).
+    if pgrep -x hyprpaper >/dev/null 2>&1; then
+      pkill -x hyprpaper 2>/dev/null || true
+      (hyprpaper >/dev/null 2>&1 &) || warn "could not restart hyprpaper; log out/in to apply wallpaper"
+    fi
+    [[ -s "$HOME/Pictures/Wallpapers/angel.png" ]] \
+      && log "wallpaper ready: ~/Pictures/Wallpapers/angel.png" \
+      || warn "wallpaper copy looks empty, check $WALLPAPERS_DIR/angel.png"
+  else
+    warn "missing $WALLPAPERS_DIR/angel.png, wallpaper NOT restored"
   fi
   if [[ -f "$WALLPAPERS_DIR/wallpaper.jpeg" && ! -f "$HOME/Pictures/Wallpapers/wallpaper.jpeg" ]]; then
     cp -p "$WALLPAPERS_DIR/wallpaper.jpeg" "$HOME/Pictures/Wallpapers/" || true
@@ -275,7 +286,10 @@ main() {
   log "- Run: gh auth login   (to restore GitHub CLI auth)"
   log "- Manual logins still needed: Brave/Chrome sync, Vesktop/Discord,"
   log "  Steam, Heroic, Telegram (flatpak), Bottles, Sober."
-  log "- Multi-monitor: run nwg-displays (rewrites monitors.conf)."
+  log "- Single monitor (eDP-1): nothing to do. Only if you add an external"
+  log "  monitor, run nwg-displays (it rewrites monitors.conf)."
+  log "- Wallpaper (angel.png) was restored to ~/Pictures/Wallpapers/ and"
+  log "  applied via hyprpaper autostart; no manual step needed."
   log "=================================================="
 }
 
