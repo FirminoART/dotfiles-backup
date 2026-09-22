@@ -1,0 +1,6 @@
+[Default Applications]
+x-scheme-handler/discord=vesktop.desktop
+x-scheme-handler/hydralauncher=hydralauncher.desktop
+
+[Added Associations]
+application/vnd.microsoft.portable-executable=nautilus-autorun-software.desktop;
